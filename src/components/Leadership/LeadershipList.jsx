@@ -120,16 +120,64 @@ const LeadershipList = () => {
           <p>Добавьте первого руководителя</p>
         </div>
       ) : (
-        <div className="leaders-grid">
-          {leaders.map(leader => (
-            <LeaderCard 
-              key={leader.id} 
-              leader={leader}
-              onDelete={hasRole('admin') ? () => handleDeleteLeader(leader.id) : null}
-              canDelete={hasRole('admin')}
-            />
-          ))}
-        </div>
+        <>
+          <div className="leaders-grid">
+            {leaders.map(leader => (
+              <LeaderCard 
+                key={leader.id} 
+                leader={leader}
+                onDelete={hasRole('admin') ? () => handleDeleteLeader(leader.id) : null}
+                canDelete={hasRole('admin')}
+              />
+            ))}
+          </div>
+
+          {/* Табличная сводка руководства */}
+          <section className="leaders-table-section">
+            <div className="page-header" style={{ marginTop: '40px' }}>
+              <div>
+                <h2>Таблица руководства</h2>
+                <p>Сводный список с ФИО, должностями, подразделениями и контактами</p>
+              </div>
+            </div>
+
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>ФИО</th>
+                    <th>Должность</th>
+                    <th>Подразделение</th>
+                    <th>Контакты</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaders.map(leader => {
+                    const dept = DEPARTMENT_CONFIG.find(d => d.code === leader.department || d.name === leader.department);
+                    return (
+                      <tr 
+                        key={leader.id}
+                        className={`leaders-table-row ${dept ? `leaders-dept-${dept.id}` : ''}`}
+                      >
+                        <td>{leader.full_name || leader.name}</td>
+                        <td>{leader.position}</td>
+                        <td>
+                          <span className="leaders-dept-cell">
+                            {dept && (
+                              <span className="dept-icon" aria-hidden="true">{dept.icon}</span>
+                            )}
+                            <span>{leader.department}</span>
+                          </span>
+                        </td>
+                        <td>{leader.contacts || '-'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </>
       )}
 
       <div className="leadership-departments">

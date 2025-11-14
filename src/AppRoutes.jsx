@@ -9,6 +9,8 @@ import Applications from './pages/Applications';
 import Database from './pages/Database';
 import Employees from './pages/Employees';
 import Admin from './pages/Admin';
+import Fleet from './pages/Fleet';
+
 import RoleProtected from './components/Layout/RoleProtected';
 
 const AppRoutes = () => {
@@ -24,6 +26,14 @@ const AppRoutes = () => {
         element={
           <RoleProtected requiredRole="employee">
             <Database />
+          </RoleProtected>
+        } 
+      />
+      <Route 
+        path="/fleet" 
+        element={
+          <RoleProtected requiredRole="employee">
+            <Fleet />
           </RoleProtected>
         } 
       />

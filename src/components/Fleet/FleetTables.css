@@ -1,0 +1,60 @@
+/* src/components/Fleet/FleetTables.css */
+.fleet-page {
+  padding: 20px 0 60px;
+}
+
+.fleet-department-section {
+  margin-top: 20px;
+}
+
+.fleet-filters {
+  margin: 12px 0 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fleet-add-form {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(15, 76, 129, 0.08);
+}
+
+.fleet-add-form h3 {
+  margin-bottom: 12px;
+}
+
+.fleet-add-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+}
+
+.fleet-row .status-badge.status-active {
+  background: #e3fcef;
+  color: #137333;
+}
+
+.fleet-row .status-badge.status-warning {
+  background: #fff4e5;
+  color: #b06000;
+}
+
+.fleet-row .status-badge.status-inactive {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+@media (max-width: 1024px) {
+  .fleet-add-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .fleet-add-grid {
+    grid-template-columns: 1fr;
+  }
+}

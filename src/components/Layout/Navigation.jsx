@@ -19,6 +19,7 @@ const Navigation = () => {
   if (hasRole('employee')) {
     navItems.push({ path: '/database', label: 'База данных' });
     navItems.push({ path: '/employees', label: 'Сотрудники' });
+    navItems.push({ path: '/fleet', label: 'Автопарк' });
   }
 
   if (hasRole('admin')) {

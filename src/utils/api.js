@@ -7,7 +7,9 @@ import {
   mockDatabaseRecords,
   mockEmployees,
   mockLeaders,
-  mockStats
+  mockStats,
+  mockFiredEmployees,
+  mockFleet
 } from '../data/mockData';
 
 const STORAGE_KEY = 'mvdsai-local-data';
@@ -24,7 +26,9 @@ const withDefaults = (state = {}) => ({
   database: state.database?.length ? state.database : clone(mockDatabaseRecords),
   employees: state.employees?.length ? state.employees : clone(mockEmployees),
   leaders: state.leaders?.length ? state.leaders : clone(mockLeaders),
-  stats: state.stats || clone(mockStats)
+  stats: state.stats || clone(mockStats),
+  firedEmployees: state.firedEmployees?.length ? state.firedEmployees : clone(mockFiredEmployees),
+  fleet: state.fleet?.length ? state.fleet : clone(mockFleet)
 });
 
 const loadState = () => {
@@ -318,7 +322,71 @@ export const updateEmployee = async (id, updates) => {
 
 export const deleteEmployee = async (id) => {
   mutateState((state) => {
-    state.employees = state.employees.filter(emp => emp.id !== Number(id));
+    const numericId = Number(id);
+    const employee = state.employees.find(emp => emp.id === numericId);
+    state.employees = state.employees.filter(emp => emp.id !== numericId);
+
+    if (employee) {
+      const firedRecord = {
+        ...employee,
+        firedAt: new Date().toLocaleDateString('ru-RU'),
+        reason: employee.status === 'Неактивный' ? 'Уволен' : employee.status || 'Уволен'
+      };
+      state.firedEmployees = [...(state.firedEmployees || []), firedRecord];
+    }
+  });
+  return respond(true);
+};
+
+// Уволенные сотрудники
+export const getFiredEmployees = async () => {
+  const state = loadState();
+  return respond(state.firedEmployees || []);
+};
+
+export const deleteFiredEmployee = async (id) => {
+  mutateState((state) => {
+    const numericId = Number(id);
+    state.firedEmployees = (state.firedEmployees || []).filter(emp => emp.id !== numericId);
+  });
+  return respond(true);
+};
+
+// Автопарк
+export const getFleet = async () => {
+  const state = loadState();
+  return respond(state.fleet || []);
+};
+
+export const createFleetItem = async (itemData) => {
+  const created = mutateState((state) => {
+    const newItem = {
+      id: Date.now(),
+      ...itemData
+    };
+    state.fleet = [...(state.fleet || []), newItem];
+    return newItem;
+  });
+
+  return respond(created);
+};
+
+export const updateFleetItem = async (id, updates) => {
+  const updated = mutateState((state) => {
+    const numericId = Number(id);
+    const item = (state.fleet || []).find(car => car.id === numericId);
+    if (!item) throw new Error('Транспорт не найден');
+    Object.assign(item, updates);
+    return item;
+  });
+
+  return respond(updated);
+};
+
+export const deleteFleetItem = async (id) => {
+  mutateState((state) => {
+    const numericId = Number(id);
+    state.fleet = (state.fleet || []).filter(car => car.id !== numericId);
   });
   return respond(true);
 };
@@ -391,9 +459,15 @@ export default {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  getFiredEmployees,
+  deleteFiredEmployee,
   getLeaders,
   createLeader,
   updateLeader,
   deleteLeader,
-  getStats
+  getStats,
+  getFleet,
+  createFleetItem,
+  updateFleetItem,
+  deleteFleetItem
 };

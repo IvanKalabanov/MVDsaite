@@ -304,3 +304,37 @@ export const mockStats = {
   inProgress: mockApplications.filter(app => app.status === 'в работе').length,
   database: mockDatabaseRecords.length
 };
+
+// Уволенные сотрудники (по умолчанию пусто, будет заполняться при удалении из основного списка)
+export const mockFiredEmployees = [];
+
+// Автопарк МВД (по умолчанию небольшой набор техники, привязанной к подразделениям)
+export const mockFleet = [
+  {
+    id: 1,
+    department: 'ППСП',
+    type: 'Патрульный автомобиль',
+    model: 'Ford Crown Victoria',
+    plate: 'МВД 001',
+    status: 'В строю',
+    notes: 'Основной патрульный экипаж'
+  },
+  {
+    id: 2,
+    department: 'ОУР',
+    type: 'Опер. автомобиль',
+    model: 'Toyota Camry',
+    plate: 'МВД 010',
+    status: 'В ремонте',
+    notes: 'Требуется замена тормозных колодок'
+  },
+  {
+    id: 3,
+    department: 'СО',
+    type: 'Следственная группа',
+    model: 'Mercedes Vito',
+    plate: 'МВД 020',
+    status: 'В строю',
+    notes: 'Используется для выезда СО на место происшествия'
+  }
+];
