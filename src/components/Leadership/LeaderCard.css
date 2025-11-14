@@ -8,6 +8,15 @@
   border: 1px solid rgba(15, 76, 129, 0.08);
   box-shadow: 0 25px 35px rgba(15, 76, 129, 0.08);
   background: var(--white);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.leader-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 45px rgba(15, 76, 129, 0.12);
 }
 
 .leader-card::after {
@@ -19,6 +28,7 @@
   background: linear-gradient(#fff, #fff) padding-box,
               linear-gradient(135deg, rgba(15, 76, 129, 0.3), rgba(15, 76, 129, 0.05)) border-box;
   pointer-events: none;
+  z-index: 0;
 }
 
 .leader-delete-btn {
@@ -33,7 +43,7 @@
   border: none;
   font-size: 1.3rem;
   cursor: pointer;
-  z-index: 10;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,6 +60,8 @@
   position: relative;
   height: 240px;
   overflow: hidden;
+  flex-shrink: 0;
+  z-index: 1;
 }
 
 .leader-image img {
@@ -81,6 +93,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .leader-meta {
@@ -103,7 +118,11 @@
   color: var(--gray-dark);
   line-height: 1.6;
   margin: 0;
-  min-height: 60px;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .leader-contacts {
@@ -114,6 +133,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-top: auto;
 }
 
 .contacts-label {
