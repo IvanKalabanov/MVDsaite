@@ -1,0 +1,92 @@
+/* src/components/Applications/ApplicationForm.css */
+.applications-page {
+  padding: 20px 0;
+}
+
+.applications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.application-card {
+  background: var(--white);
+  padding: 30px 25px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 5px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.application-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.application-card:hover .application-arrow {
+  transform: translateX(5px);
+}
+
+.application-red { border-left-color: var(--red); }
+.application-orange { border-left-color: var(--orange); }
+.application-blue { border-left-color: var(--light-blue); }
+.application-purple { border-left-color: #8b5cf6; }
+
+.application-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.application-card h3 {
+  color: var(--primary-blue);
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.application-card p {
+  color: var(--gray-dark);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.application-arrow {
+  color: var(--light-blue);
+  font-size: 1.5rem;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+/* src/components/Applications/ApplicationForm.css (обновляем) */
+.applications-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--gray-light);
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--gray-dark);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.tab-btn:hover {
+  color: var(--primary-blue);
+  background: var(--gray-light);
+}
+
+.tab-btn.active {
+  color: var(--primary-blue);
+  border-bottom-color: var(--accent-gold);
+  background: var(--gray-light);
+}

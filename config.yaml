@@ -1,0 +1,9 @@
+name: Local Config
+version: 1.0.0
+schema: v1
+models:
+  - title: DeepSeek
+    provider: openai
+    model: deepseek-chat
+    apiKey: sk-твой_ключ
+    apiBase: https://api.deepseek.com/v1

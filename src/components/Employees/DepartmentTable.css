@@ -1,0 +1,222 @@
+/* src/components/Employees/DepartmentTable.css */
+.department-section {
+  margin-bottom: 40px;
+}
+
+.department-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: 0 20px 35px rgba(15, 76, 129, 0.1);
+  position: relative;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.department-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--white);
+  opacity: 0.9;
+}
+
+.department-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.dept-ribbon {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+}
+
+.dept-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.dept-description {
+  margin: 6px 0 0;
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+}
+
+.dept-title h2 {
+  color: var(--primary-blue);
+  margin: 0;
+}
+
+.dept-icon {
+  font-size: 2rem;
+}
+
+.dept-stats {
+  color: var(--gray-dark);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 76, 129, 0.08);
+}
+
+.employee-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.name-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--light-blue) 0%, var(--primary-blue) 100%);
+  color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.rank-badge {
+  background: var(--accent-gold);
+  color: var(--primary-blue);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-phone {
+  font-size: 0.9rem;
+  color: var(--gray-dark);
+}
+
+.empty-department {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--white);
+  border-radius: 10px;
+  color: var(--gray-dark);
+}
+
+.empty-department p {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: var(--gray-dark);
+  background: var(--white);
+  border-radius: 10px;
+}
+
+/* src/components/Employees/DepartmentTable.css (обновляем) */
+.employee-row:hover {
+  background: #f8fafc;
+}
+
+.editable-name {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 5px;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+.editable-name:hover {
+  background: var(--gray-light);
+}
+
+.inline-input {
+  padding: 4px 8px;
+  border: 1px solid var(--light-blue);
+  border-radius: 3px;
+  background: var(--white);
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.inline-select {
+  padding: 4px 8px;
+  border: 1px solid var(--light-blue);
+  border-radius: 3px;
+  background: var(--white);
+  font-size: 0.8rem;
+  min-width: 120px;
+}
+
+.status-select {
+  min-width: 140px;
+}
+
+.status-indicator {
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: var(--gray-light);
+}
+
+.status-active {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.status-vacation {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-sick {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+.status-mission {
+  background: #dbeafe;
+  color: var(--primary-blue);
+}
+
+.status-inactive {
+  background: #e5e7eb;
+  color: var(--gray-dark);
+}
+
+.quick-edit-overlay {
+  position: fixed;
+  background: var(--white);
+  border: 2px solid var(--light-blue);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.quick-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: flex-end;
+}

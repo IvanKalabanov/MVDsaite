@@ -1,0 +1,137 @@
+/* src/components/Leadership/LeadershipList.css */
+.leadership-list {
+  padding: 20px 0 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.leadership-hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 32px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #0f4c81, #1b6ca8);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.leadership-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 55%);
+  pointer-events: none;
+}
+
+.leadership-hero > * {
+  position: relative;
+}
+
+.hero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  line-height: 1.5;
+  opacity: 0.9;
+  margin-top: 12px;
+  max-width: 520px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.hero-stat {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: left;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.leadership-alert {
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: #fff8e6;
+  color: #8a5200;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.leadership-departments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.leadership-dept-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  gap: 12px;
+  box-shadow: 0 15px 30px rgba(15, 76, 129, 0.08);
+  border: 1px solid rgba(15, 76, 129, 0.08);
+}
+
+.leadership-dept-card .dept-icon {
+  font-size: 1.8rem;
+}
+
+.leadership-dept-card .dept-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--primary-blue);
+}
+
+.leadership-dept-card .dept-description {
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .leadership-hero {
+    padding: 24px;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+}
