@@ -35,6 +35,10 @@
 .fleet-add-form .form-input,
 .fleet-add-form .form-select {
   width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 76, 129, 0.16);
+  background: #ffffff;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, transform 0.1s ease;
 }
 
 .fleet-add-form .btn.btn-primary {
@@ -66,13 +70,19 @@
 .fleet-modal .fleet-add-form {
   box-shadow: none;
   padding: 0;
+  margin-top: 12px;
 }
 
 .fleet-modal {
-  padding: 24px 28px 22px;
-  max-width: 720px;
-  border-radius: 20px;
-  box-shadow: 0 18px 45px rgba(15, 76, 129, 0.35);
+  position: relative;
+  padding: 24px 26px 22px;
+  max-width: 520px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(15, 76, 129, 0.08);
+  overflow: hidden;
+  animation: fleetModalFadeIn 0.22s ease-out;
 }
 
 .fleet-modal-header {
@@ -88,7 +98,7 @@
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #0f4c81, #5dade2);
+  background: #0f4c81;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,6 +125,70 @@
 .fleet-modal-dept-hint {
   font-size: 0.85rem;
   color: var(--gray-dark);
+}
+
+/* Усиление интерактивности внутри модалки автопарка */
+.fleet-modal .form-input:focus,
+.fleet-modal .form-select:focus {
+  border-color: rgba(15, 76, 129, 0.6);
+  box-shadow: 0 0 0 1px rgba(15, 76, 129, 0.18);
+  outline: none;
+  background: #f4f9ff;
+  transform: translateY(-1px);
+}
+
+.fleet-modal .form-input::placeholder {
+  color: rgba(0, 0, 0, 0.42);
+}
+
+.fleet-modal .form-select {
+  cursor: pointer;
+}
+
+.fleet-modal .form-actions .btn-primary {
+  box-shadow: 0 10px 26px rgba(15, 76, 129, 0.35);
+  transform: translateY(0);
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.fleet-modal .form-actions .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(15, 76, 129, 0.42);
+}
+
+.fleet-modal .form-actions .btn-secondary {
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.fleet-modal .form-actions .btn-secondary:hover {
+  background-color: rgba(15, 76, 129, 0.04);
+}
+
+.fleet-modal .checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.modal-overlay .fleet-modal {
+  transform-origin: 50% 45%;
+}
+
+/* Сетка формы в модалке — только столбиком */
+.fleet-modal .fleet-add-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@keyframes fleetModalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (max-width: 1024px) {
