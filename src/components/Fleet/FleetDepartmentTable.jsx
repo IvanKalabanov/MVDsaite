@@ -2,17 +2,7 @@
 import React, { useState } from 'react';
 import './FleetTables.css';
 
-const emptyItem = (departmentCode) => ({
-  department: departmentCode,
-  type: '',
-  model: '',
-  plate: '',
-  status: 'В строю',
-  notes: ''
-});
-
-const FleetDepartmentTable = ({ department, items, canEdit, onCreate, onUpdate, onDelete }) => {
-  const [newItem, setNewItem] = useState(() => emptyItem(department?.code || department?.name || ''));
+const FleetDepartmentTable = ({ department, items, canEdit, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState(null);
   const [editDraft, setEditDraft] = useState(null);
 
@@ -23,18 +13,6 @@ const FleetDepartmentTable = ({ department, items, canEdit, onCreate, onUpdate, 
       </div>
     );
   }
-
-  const handleChangeNew = (e) => {
-    const { name, value } = e.target;
-    setNewItem(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmitNew = (e) => {
-    e.preventDefault();
-    if (!newItem.type || !newItem.model || !newItem.plate) return;
-    onCreate(newItem);
-    setNewItem(emptyItem(department.code || department.name));
-  };
 
   const startEdit = (item) => {
     setEditingId(item.id);
@@ -184,62 +162,6 @@ const FleetDepartmentTable = ({ department, items, canEdit, onCreate, onUpdate, 
           </tbody>
         </table>
       </div>
-
-      {canEdit && (
-        <form className="fleet-add-form" onSubmit={handleSubmitNew}>
-          <h3>Добавить транспортное средство</h3>
-          <div className="fleet-add-grid">
-            <input
-              type="text"
-              name="type"
-              value={newItem.type}
-              onChange={handleChangeNew}
-              className="form-input"
-              placeholder="Тип (патрульный, оперативный и т.п.)"
-              required
-            />
-            <input
-              type="text"
-              name="model"
-              value={newItem.model}
-              onChange={handleChangeNew}
-              className="form-input"
-              placeholder="Модель"
-              required
-            />
-            <input
-              type="text"
-              name="plate"
-              value={newItem.plate}
-              onChange={handleChangeNew}
-              className="form-input"
-              placeholder="Госномер"
-              required
-            />
-            <select
-              name="status"
-              value={newItem.status}
-              onChange={handleChangeNew}
-              className="form-select"
-            >
-              <option value="В строю">В строю</option>
-              <option value="В ремонте">В ремонте</option>
-              <option value="Списан">Списан</option>
-            </select>
-            <input
-              type="text"
-              name="notes"
-              value={newItem.notes}
-              onChange={handleChangeNew}
-              className="form-input"
-              placeholder="Примечание"
-            />
-            <button type="submit" className="btn btn-primary">
-              + Добавить в автопарк
-            </button>
-          </div>
-        </form>
-      )}
     </div>
   );
 };

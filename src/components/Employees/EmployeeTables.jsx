@@ -5,8 +5,11 @@ import {
   getEmployees, 
   createEmployee, 
   getFiredEmployees, 
-  deleteFiredEmployee 
+  deleteFiredEmployee,
+  getLeaders,
+  createLeader
 } from '../../utils/api';
+import AddLeaderForm from '../Leadership/AddLeaderForm';
 import DepartmentTable from './DepartmentTable';
 import EmployeeForm from './EmployeeForm';
 import { DEPARTMENT_CONFIG } from '../../utils/constants';
@@ -15,10 +18,13 @@ import './EmployeeTables.css';
 const EmployeeTables = () => {
   const { hasRole } = useAuth();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddLeaderForm, setShowAddLeaderForm] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [firedEmployees, setFiredEmployees] = useState([]);
   const [firedLoading, setFiredLoading] = useState(true);
+  const [leaders, setLeaders] = useState([]);
+  const [leadersLoading, setLeadersLoading] = useState(true);
 
   const departments = DEPARTMENT_CONFIG;
   const [activeDepartment, setActiveDepartment] = useState(departments[0]?.id || 'staff');
@@ -26,6 +32,7 @@ const EmployeeTables = () => {
   useEffect(() => {
     loadEmployees();
     loadFiredEmployees();
+    loadLeaders();
   }, []);
 
   const loadEmployees = async () => {
@@ -56,6 +63,31 @@ const EmployeeTables = () => {
       alert('Ошибка загрузки уволенных сотрудников. Данные берутся из локального хранилища.');
     } finally {
       setFiredLoading(false);
+    }
+  };
+
+  const loadLeaders = async () => {
+    try {
+      setLeadersLoading(true);
+      const data = await getLeaders();
+      setLeaders(data || []);
+    } catch (error) {
+      console.error('Ошибка загрузки руководителей для раздела сотрудников:', error);
+      alert('Ошибка загрузки руководства для раздела сотрудников. Данные могут быть неактуальны.');
+    } finally {
+      setLeadersLoading(false);
+    }
+  };
+
+  const handleAddLeader = async (newLeader) => {
+    try {
+      const created = await createLeader(newLeader);
+      setLeaders(prev => [...prev, created]);
+      setShowAddLeaderForm(false);
+      alert('Руководитель успешно добавлен!');
+    } catch (error) {
+      console.error('Ошибка добавления руководителя из раздела сотрудников:', error);
+      alert('Ошибка добавления руководителя');
     }
   };
 
@@ -217,6 +249,64 @@ const EmployeeTables = () => {
           </div>
         )}
       </div>
+
+      {/* Таблица руководства (сводка для сотрудников) */}
+      <div className="leaders-summary-section">
+        <div className="page-header" style={{ marginTop: '40px' }}>
+          <div>
+            <h2>Руководство подразделений</h2>
+            <p>Сводная таблица руководителей по подразделениям МВД</p>
+          </div>
+          {hasRole('admin') && (
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowAddLeaderForm(true)}
+            >
+              + Добавить руководителя
+            </button>
+          )}
+        </div>
+
+        {leadersLoading ? (
+          <div className="no-data">
+            <p>Загрузка данных о руководстве...</p>
+          </div>
+        ) : leaders.length === 0 ? (
+          <div className="no-data">
+            <p>Записей о руководстве пока нет</p>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ФИО</th>
+                  <th>Должность</th>
+                  <th>Подразделение</th>
+                  <th>Контакты</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaders.map(leader => (
+                  <tr key={leader.id}>
+                    <td>{leader.full_name || leader.name}</td>
+                    <td>{leader.position}</td>
+                    <td>{leader.department}</td>
+                    <td>{leader.contacts || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {showAddLeaderForm && (
+        <AddLeaderForm
+          onAdd={handleAddLeader}
+          onCancel={() => setShowAddLeaderForm(false)}
+        />
+      )}
     </div>
   );
 };
