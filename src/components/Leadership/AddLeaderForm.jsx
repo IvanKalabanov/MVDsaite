@@ -3,15 +3,19 @@ import React, { useState } from 'react';
 import { DEPARTMENT_CONFIG } from '../../utils/constants';
 import './AddLeaderForm.css';
 
-const AddLeaderForm = ({ onAdd, onCancel, departments = DEPARTMENT_CONFIG }) => {
+const AddLeaderForm = ({ onAdd, onCancel, departments = DEPARTMENT_CONFIG, forceLeadership = false }) => {
   const departmentOptions = departments && departments.length ? departments : DEPARTMENT_CONFIG;
   const [formData, setFormData] = useState({
     full_name: '',
     position: '',
-    department: departmentOptions[0]?.code || 'Штаб',
+    department: forceLeadership ? 'Руководство' : (departmentOptions[0]?.code || 'Штаб'),
     photo: '',
     bio: '',
-    contacts: ''
+    contacts: '',
+    vehicleType: '',
+    vehicleModel: '',
+    vehiclePlate: '',
+    vehicleNotes: ''
   });
   const [photoPreview, setPhotoPreview] = useState('');
   const [photoUrlInput, setPhotoUrlInput] = useState('');
@@ -95,21 +99,23 @@ const AddLeaderForm = ({ onAdd, onCancel, departments = DEPARTMENT_CONFIG }) => 
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Подразделение *</label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="form-select"
-              >
-                {departmentOptions.map(dept => (
-                  <option key={dept.id} value={dept.code}>
-                    {dept.icon} {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!forceLeadership && (
+              <div className="form-group">
+                <label className="form-label">Подразделение *</label>
+                <select
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  {departmentOptions.map(dept => (
+                    <option key={dept.id} value={dept.code}>
+                      {dept.icon} {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -123,6 +129,56 @@ const AddLeaderForm = ({ onAdd, onCancel, departments = DEPARTMENT_CONFIG }) => 
               placeholder="Например: Начальник Штаба"
               required
             />
+          </div>
+
+          {/* Блок служебного транспорта руководства */}
+          {/* */}
+          <div className="form-group">
+            <label className="form-label">Служебный транспорт (опционально)</label>
+            <div className="form-row">
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="vehicleType"
+                  value={formData.vehicleType}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Тип транспорта (патрульный, оперативный и т.п.)"
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="vehicleModel"
+                  value={formData.vehicleModel}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Модель служебного авто"
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="vehiclePlate"
+                  value={formData.vehiclePlate}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Госномер"
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="vehicleNotes"
+                  value={formData.vehicleNotes}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Примечание (например, закрепление за должностью)"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="photo-upload-block">

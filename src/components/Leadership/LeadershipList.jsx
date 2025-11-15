@@ -1,7 +1,7 @@
 // src/components/Leadership/LeadershipList.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getLeaders, createLeader, deleteLeader } from '../../utils/api';
+import { getLeaders, createLeader, deleteLeader, createFleetItem } from '../../utils/api';
 import { DEPARTMENT_CONFIG } from '../../utils/constants';
 import LeaderCard from './LeaderCard';
 import AddLeaderForm from './AddLeaderForm';
@@ -37,6 +37,24 @@ const LeadershipList = () => {
     try {
       const created = await createLeader(newLeader);
       setLeaders(prev => [...prev, created]);
+      // Если при добавлении руководителя указаны данные служебного транспорта,
+      // создаём запись в автопарке как транспорт руководства
+      if (newLeader.vehicleModel && newLeader.vehiclePlate) {
+        try {
+          await createFleetItem({
+            department: 'Штаб',
+            type: newLeader.vehicleType || 'Служебный автомобиль',
+            model: newLeader.vehicleModel,
+            plate: newLeader.vehiclePlate,
+            status: 'В строю',
+            notes: newLeader.vehicleNotes || `Закреплён за: ${newLeader.full_name || newLeader.name || 'руководитель'}`,
+            isLeadership: true
+          });
+        } catch (fleetError) {
+          console.error('Ошибка создания транспорта руководства при добавлении руководителя:', fleetError);
+        }
+      }
+
       setShowAddForm(false);
       alert('Руководитель успешно добавлен!');
     } catch (error) {

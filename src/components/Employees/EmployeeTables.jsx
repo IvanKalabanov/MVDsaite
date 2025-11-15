@@ -7,7 +7,8 @@ import {
   getFiredEmployees, 
   deleteFiredEmployee,
   getLeaders,
-  createLeader
+  createLeader,
+  deleteLeader
 } from '../../utils/api';
 import AddLeaderForm from '../Leadership/AddLeaderForm';
 import DepartmentTable from './DepartmentTable';
@@ -27,7 +28,17 @@ const EmployeeTables = () => {
   const [leadersLoading, setLeadersLoading] = useState(true);
 
   const departments = DEPARTMENT_CONFIG;
-  const [activeDepartment, setActiveDepartment] = useState(departments[0]?.id || 'staff');
+  // В сотрудниках добавляем виртуальный раздел "Руководство" первым, как в автопарке
+  const leadershipDept = {
+    id: 'leadership',
+    code: 'Руководство',
+    name: 'Руководство',
+    icon: '👔',
+    gradient: 'linear-gradient(135deg, #0f4c81, #1b6ca8)',
+    description: 'Начальник МВД и заместитель начальника МВД'
+  };
+  const navDepartments = [leadershipDept, ...departments];
+  const [activeDepartment, setActiveDepartment] = useState('leadership');
 
   useEffect(() => {
     loadEmployees();
@@ -45,6 +56,19 @@ const EmployeeTables = () => {
       alert('Ошибка загрузки сотрудников. Данные берутся из локального хранилища.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteLeader = async (leaderId) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этого руководителя?')) return;
+
+    try {
+      await deleteLeader(leaderId);
+      setLeaders(prev => prev.filter(l => l.id !== leaderId));
+      alert('Руководитель успешно удалён!');
+    } catch (error) {
+      console.error('Ошибка удаления руководителя из раздела сотрудников:', error);
+      alert('Ошибка удаления руководителя');
     }
   };
 
@@ -91,7 +115,7 @@ const EmployeeTables = () => {
     }
   };
 
-  // Группируем сотрудников по отделам
+  // Группируем сотрудников по отделам (кроме виртуального раздела руководства)
   const employeesData = departments.reduce((acc, dept) => {
     acc[dept.id] = employees.filter(
       (emp) => emp.department === dept.code || emp.department === dept.name
@@ -136,6 +160,14 @@ const EmployeeTables = () => {
     }
   };
 
+  const activeDept = activeDepartment === 'leadership'
+    ? leadershipDept
+    : departments.find(d => d.id === activeDepartment);
+
+  const activeDeptEmployees = activeDepartment === 'leadership'
+    ? []
+    : employeesData[activeDepartment];
+
   return (
     <div className="employees-page">
       <div className="page-header">
@@ -153,10 +185,9 @@ const EmployeeTables = () => {
           </button>
         )}
       </div>
-
-      {/* Навигация по отделам */}
+      {/* Навигация по отделам (включая руководство) */}
       <div className="departments-nav">
-        {departments.map(dept => (
+        {navDepartments.map(dept => (
           <button
             key={dept.id}
             className={`department-tab ${activeDepartment === dept.id ? 'active' : ''}`}
@@ -169,19 +200,85 @@ const EmployeeTables = () => {
                 <span className="dept-subtitle">{dept.description}</span>
               )}
             </div>
-            <span className="employee-count">{employeesData[dept.id]?.length || 0}</span>
+            <span className="employee-count">
+              {dept.id === 'leadership'
+                ? (leaders.length || 0)
+                : (employeesData[dept.id]?.length || 0)}
+            </span>
           </button>
         ))}
       </div>
+      {/* Контент активной вкладки: либо руководство, либо сотрудники отдела */}
+      {activeDepartment === 'leadership' ? (
+        <div className="leaders-summary-section" style={{ marginTop: '24px' }}>
+          <div className="page-header">
+            <div>
+              <h2>Руководство МВД</h2>
+              <p>Начальник МВД и заместитель начальника МВД</p>
+            </div>
+            {hasRole('admin') && (
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowAddLeaderForm(true)}
+              >
+                + Добавить руководителя
+              </button>
+            )}
+          </div>
 
-      {/* Таблица активного отдела */}
-      <DepartmentTable 
-        department={departments.find(d => d.id === activeDepartment)}
-        employees={employeesData[activeDepartment]}
-        canEdit={hasRole('leader') || hasRole('admin')}
-        onEmployeeUpdate={handleEmployeeUpdate}
-        onEmployeeDelete={handleEmployeeDelete}
-      />
+          {leadersLoading ? (
+            <div className="no-data">
+              <p>Загрузка данных о руководстве...</p>
+            </div>
+          ) : leaders.length === 0 ? (
+            <div className="no-data">
+              <p>Записи о руководстве пока не заполнены</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>ФИО</th>
+                    <th>Должность</th>
+                    <th>Подразделение</th>
+                    <th>Контакты</th>
+                    {hasRole('admin') && <th>Действия</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaders.map(leader => (
+                    <tr key={leader.id}>
+                      <td>{leader.full_name || leader.name}</td>
+                      <td>{leader.position}</td>
+                      <td>{leader.department}</td>
+                      <td>{leader.contacts || '-'}</td>
+                      {hasRole('admin') && (
+                        <td>
+                          <button
+                            className="btn btn-small btn-danger"
+                            onClick={() => handleDeleteLeader(leader.id)}
+                          >
+                            Удалить
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        <DepartmentTable 
+          department={activeDept}
+          employees={activeDeptEmployees}
+          canEdit={hasRole('leader') || hasRole('admin')}
+          onEmployeeUpdate={handleEmployeeUpdate}
+          onEmployeeDelete={handleEmployeeDelete}
+        />
+      )}
 
       {showAddForm && (
         <EmployeeForm 
@@ -250,61 +347,14 @@ const EmployeeTables = () => {
         )}
       </div>
 
-      {/* Таблица руководства (сводка для сотрудников) */}
-      <div className="leaders-summary-section">
-        <div className="page-header" style={{ marginTop: '40px' }}>
-          <div>
-            <h2>Руководство подразделений</h2>
-            <p>Сводная таблица руководителей по подразделениям МВД</p>
-          </div>
-          {hasRole('admin') && (
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowAddLeaderForm(true)}
-            >
-              + Добавить руководителя
-            </button>
-          )}
-        </div>
-
-        {leadersLoading ? (
-          <div className="no-data">
-            <p>Загрузка данных о руководстве...</p>
-          </div>
-        ) : leaders.length === 0 ? (
-          <div className="no-data">
-            <p>Записей о руководстве пока нет</p>
-          </div>
-        ) : (
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>ФИО</th>
-                  <th>Должность</th>
-                  <th>Подразделение</th>
-                  <th>Контакты</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaders.map(leader => (
-                  <tr key={leader.id}>
-                    <td>{leader.full_name || leader.name}</td>
-                    <td>{leader.position}</td>
-                    <td>{leader.department}</td>
-                    <td>{leader.contacts || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Остальная сводка руководства по подразделениям (если понадобится расширить роли) */}
 
       {showAddLeaderForm && (
         <AddLeaderForm
           onAdd={handleAddLeader}
           onCancel={() => setShowAddLeaderForm(false)}
+          departments={departments}
+          forceLeadership={true}
         />
       )}
     </div>

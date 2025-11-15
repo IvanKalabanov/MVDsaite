@@ -1,18 +1,10 @@
 // src/utils/api.js
-// Реализация "бэкенда" на фронтенде через localStorage + моковые данные
-import {
-  mockUsers,
-  mockNews,
-  mockApplications,
-  mockDatabaseRecords,
-  mockEmployees,
-  mockLeaders,
-  mockStats,
-  mockFiredEmployees,
-  mockFleet
-} from '../data/mockData';
+// Реализация "бэкенда" на фронтенде через localStorage.
+// Ранее использовались моковые данные, теперь начальное состояние всегда пустое,
+// а всё наполнение идёт только из форм приложения.
 
-const STORAGE_KEY = 'mvdsai-local-data';
+export const STORAGE_KEY = 'mvdsai-local-data';
+const STORAGE_VERSION = 2;
 const isBrowser = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 
 let memoryState = null;
@@ -20,33 +12,94 @@ let memoryState = null;
 const clone = (data) => (data === undefined ? undefined : JSON.parse(JSON.stringify(data)));
 
 const withDefaults = (state = {}) => ({
-  users: state.users?.length ? state.users : clone(mockUsers),
-  news: state.news?.length ? state.news : clone(mockNews),
-  applications: state.applications?.length ? state.applications : clone(mockApplications),
-  database: state.database?.length ? state.database : clone(mockDatabaseRecords),
-  employees: state.employees?.length ? state.employees : clone(mockEmployees),
-  leaders: state.leaders?.length ? state.leaders : clone(mockLeaders),
-  stats: state.stats || clone(mockStats),
-  firedEmployees: state.firedEmployees?.length ? state.firedEmployees : clone(mockFiredEmployees),
-  fleet: state.fleet?.length ? state.fleet : clone(mockFleet)
+  __version: STORAGE_VERSION,
+  users: Array.isArray(state.users) ? state.users : [],
+  news: Array.isArray(state.news) ? state.news : [],
+  applications: Array.isArray(state.applications) ? state.applications : [],
+  database: Array.isArray(state.database) ? state.database : [],
+  employees: Array.isArray(state.employees) ? state.employees : [],
+  leaders: Array.isArray(state.leaders) ? state.leaders : [],
+  stats: state.stats || {
+    employees: Array.isArray(state.employees) ? state.employees.length : 0,
+    applications: Array.isArray(state.applications) ? state.applications.length : 0,
+    inProgress: Array.isArray(state.applications)
+      ? state.applications.filter(app => app.status === 'в работе').length
+      : 0,
+    database: Array.isArray(state.database) ? state.database.length : 0
+  },
+  firedEmployees: Array.isArray(state.firedEmployees) ? state.firedEmployees : [],
+  fleet: Array.isArray(state.fleet) ? state.fleet : []
 });
+
+// Тестовые пользователи по умолчанию
+const defaultUsers = [
+  {
+    id: 1,
+    name: 'Администратор системы',
+    login: 'admin',
+    role: 'admin',
+    department: 'Штаб',
+    lastActive: new Date().toISOString().split('T')[0],
+    password: 'admin123',
+    email: 'admin@example.com',
+    phone: '+7 (900) 123-45-67',
+    position: 'Главный администратор системы'
+  },
+  {
+    id: 2,
+    name: 'Руководитель ОУР',
+    login: 'leader',
+    role: 'leader',
+    department: 'ОУР',
+    lastActive: new Date().toISOString().split('T')[0],
+    password: 'leader123',
+    email: 'leader@example.com',
+    phone: '+7 (900) 234-56-78',
+    position: 'Руководитель отдела'
+  },
+  {
+    id: 3,
+    name: 'Сотрудник ППСП',
+    login: 'employee',
+    role: 'employee',
+    department: 'ППСП',
+    lastActive: new Date().toISOString().split('T')[0],
+    password: 'employee123',
+    email: 'employee@example.com',
+    phone: '+7 (900) 345-67-89',
+    position: 'Старший инспектор'
+  },
+  {
+    id: 4,
+    name: 'Гражданин',
+    login: 'user',
+    role: 'user',
+    department: '-',
+    lastActive: new Date().toISOString().split('T')[0],
+    password: 'user123',
+    email: 'user@example.com',
+    phone: '+7 (900) 456-78-90',
+    position: 'Физическое лицо'
+  }
+];
 
 const loadState = () => {
   if (memoryState) return memoryState;
 
-  if (isBrowser) {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        memoryState = withDefaults(JSON.parse(raw));
-        return memoryState;
-      }
-    } catch (error) {
-      console.warn('Не удалось прочитать сохранённые данные, используем значения по умолчанию.', error);
-    }
-  }
-
+  console.log('Загрузка состояния из localStorage...');
+  
+  // Всегда создаем новое состояние с тестовыми пользователями
+  console.log('Инициализация нового состояния с тестовыми пользователями');
   memoryState = withDefaults();
+  
+  // Добавляем тестовых пользователей
+  memoryState.users = [...defaultUsers];
+  console.log('Созданные тестовые пользователи:', memoryState.users);
+  
+  // Сохраняем состояние
+  saveState(memoryState);
+  
+  console.log('Состояние успешно инициализировано');
   return memoryState;
 };
 
@@ -97,21 +150,46 @@ const ensureTimestamp = () => {
 
 // Авторизация
 export const login = async (loginValue, password) => {
-  const state = loadState();
-  const user = state.users.find(u => u.login === loginValue);
-
-  if (!user) {
-    throw new Error('Пользователь не найден');
+  try {
+    console.log('=== Попытка входа ===');
+    console.log('Логин:', loginValue);
+    
+    // Загружаем состояние (это гарантированно вернет состояние с тестовыми пользователями)
+    const state = loadState();
+    
+    // Ищем пользователя (регистронезависимый поиск)
+    const user = state.users.find(u => 
+      u.login.toLowerCase() === loginValue.toLowerCase()
+    );
+    
+    console.log('Найден пользователь:', user ? 'Да' : 'Нет');
+    
+    if (!user) {
+      console.error('❌ Ошибка: Пользователь не найден');
+      console.log('Доступные пользователи:', state.users.map(u => u.login));
+      throw new Error('Пользователь не найден');
+    }
+    
+    if (user.password !== password) {
+      console.error('❌ Ошибка: Неверный пароль');
+      throw new Error('Неверный пароль');
+    }
+    
+    // Обновляем время последнего входа
+    user.lastActive = new Date().toISOString().split('T')[0];
+    saveState(state);
+    
+    console.log('✅ Успешный вход');
+    console.log('Роль пользователя:', user.role);
+    
+    // Возвращаем пользователя без пароля
+    const { password: _, ...safeUser } = user;
+    return respond({ user: safeUser });
+    
+  } catch (error) {
+    console.error('Ошибка при входе:', error);
+    throw error; // Пробрасываем ошибку дальше
   }
-
-  if (user.password && password !== user.password) {
-    throw new Error('Неверный пароль');
-  }
-
-  user.lastActive = new Date().toISOString().split('T')[0];
-  saveState(state);
-
-  return respond({ user: sanitizeUser(user) });
 };
 
 export const register = async (name, loginValue, password, role = 'user') => {

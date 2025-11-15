@@ -10,7 +10,17 @@ const FleetTables = () => {
   const { hasRole } = useAuth();
   const [fleet, setFleet] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeDepartment, setActiveDepartment] = useState(DEPARTMENT_CONFIG[0]?.id || 'staff');
+  // В автопарке добавляем виртуальный раздел "Руководство" первым
+  const leadershipDept = {
+    id: 'leadership',
+    code: 'Руководство',
+    name: 'Руководство',
+    icon: '👔',
+    gradient: 'linear-gradient(135deg, #0f4c81, #1b6ca8)',
+    description: 'Транспорт, закреплённый за начальником МВД и его заместителем'
+  };
+  const navDepartments = [leadershipDept, ...DEPARTMENT_CONFIG];
+  const [activeDepartment, setActiveDepartment] = useState('leadership');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [newItem, setNewItem] = useState({
@@ -21,7 +31,6 @@ const FleetTables = () => {
     status: 'В строю',
     notes: ''
   });
-  const [forLeadership, setForLeadership] = useState(false);
 
   useEffect(() => {
     loadFleet();
@@ -72,17 +81,26 @@ const FleetTables = () => {
     }
   };
 
+  // Отдельно храним транспорт руководства (isLeadership === true)
+  const leadershipFleet = fleet.filter(car => car.isLeadership);
+
+  // Остальной транспорт по подразделениям, без машин руководства
   const fleetByDept = DEPARTMENT_CONFIG.reduce((acc, dept) => {
     acc[dept.id] = fleet.filter(
-      car => car.department === dept.code || car.department === dept.name
+      car => !car.isLeadership && (car.department === dept.code || car.department === dept.name)
     );
     return acc;
   }, {});
 
   const canEdit = hasRole('leader') || hasRole('admin');
 
-  const activeDept = DEPARTMENT_CONFIG.find(d => d.id === activeDepartment);
-  const activeDeptItems = fleetByDept[activeDepartment] || [];
+  const activeDept = activeDepartment === 'leadership'
+    ? leadershipDept
+    : DEPARTMENT_CONFIG.find(d => d.id === activeDepartment);
+
+  const activeDeptItems = activeDepartment === 'leadership'
+    ? leadershipFleet
+    : (fleetByDept[activeDepartment] || []);
   const filteredItems = activeDeptItems.filter(car => {
     if (statusFilter === 'all') return true;
     return car.status === statusFilter;
@@ -103,14 +121,17 @@ const FleetTables = () => {
             className="btn btn-primary"
             onClick={() => {
               setNewItem({
-                department: activeDept?.code || activeDept?.name || '',
+                // Для руководства всегда сохраняем в условный "Штаб" как служебный транспорт,
+                // для остальных отделов — в код/название активного подразделения
+                department: activeDepartment === 'leadership'
+                  ? 'Штаб'
+                  : (activeDept?.code || activeDept?.name || ''),
                 type: '',
                 model: '',
                 plate: '',
                 status: 'В строю',
                 notes: ''
               });
-              setForLeadership(activeDept?.code === 'Штаб' || activeDept?.name === 'Штаб');
               setShowAddModal(true);
             }}
           >
@@ -120,7 +141,7 @@ const FleetTables = () => {
       </div>
 
       <div className="departments-nav">
-        {DEPARTMENT_CONFIG.map(dept => (
+        {navDepartments.map(dept => (
           <button
             key={dept.id}
             className={`department-tab ${activeDepartment === dept.id ? 'active' : ''}`}
@@ -133,7 +154,11 @@ const FleetTables = () => {
                 <span className="dept-subtitle">{dept.description}</span>
               )}
             </div>
-            <span className="employee-count">{fleetByDept[dept.id]?.length || 0}</span>
+            <span className="employee-count">
+              {dept.id === 'leadership'
+                ? leadershipFleet.length
+                : (fleetByDept[dept.id]?.length || 0)}
+            </span>
           </button>
         ))}
       </div>
@@ -159,24 +184,6 @@ const FleetTables = () => {
         onDelete={handleDelete}
       />
 
-      {/* Отдельная таблица автопарка руководства (Штаб) */}
-      <div className="fleet-department-section" style={{ marginTop: '40px' }}>
-        <div className="page-header">
-          <div>
-            <h2>Транспорт руководства</h2>
-            <p>Отдельная сводка по технике, закреплённой за штабом и руководством</p>
-          </div>
-        </div>
-
-        <FleetDepartmentTable
-          department={DEPARTMENT_CONFIG.find(d => d.code === 'Штаб' || d.name === 'Штаб')}
-          items={fleet.filter(car => car.department === 'Штаб')}
-          canEdit={canEdit}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-        />
-      </div>
-
       {showAddModal && canEdit && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content large-modal fleet-modal" onClick={e => e.stopPropagation()}>
@@ -197,9 +204,10 @@ const FleetTables = () => {
                 if (!newItem.type || !newItem.model || !newItem.plate) return;
                 handleCreate({
                   ...newItem,
-                  department: forLeadership
+                  department: activeDepartment === 'leadership'
                     ? 'Штаб'
-                    : (activeDept?.code || activeDept?.name || newItem.department)
+                    : (activeDept?.code || activeDept?.name || newItem.department),
+                  isLeadership: activeDepartment === 'leadership'
                 });
               }}
             >
@@ -251,16 +259,10 @@ const FleetTables = () => {
                 />
               </div>
               <div className="fleet-modal-options">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={forLeadership}
-                    onChange={(e) => setForLeadership(e.target.checked)}
-                  />
-                  <span>Транспорт руководства (Штаб)</span>
-                </label>
                 <span className="fleet-modal-dept-hint">
-                  Будет сохранён в: {forLeadership ? 'Штаб' : (activeDept?.name || 'выбранное подразделение')}
+                  Будет сохранён в: {activeDepartment === 'leadership'
+                    ? 'Руководство (служебный транспорт "Штаб")'
+                    : (activeDept?.name || 'выбранное подразделение')}
                 </span>
               </div>
               <div className="form-actions" style={{ marginTop: '16px' }}>

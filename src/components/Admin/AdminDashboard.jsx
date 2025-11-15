@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getStats, getApplications, getNews, getDatabaseRecords } from '../../utils/api';
 import RoleManagement from './RoleManagement';
+import DataManager from './DataManager';
 import './AdminDashboard.css';
 
 const LOCAL_STORAGE_KEY = 'mvdsai-local-data';
@@ -66,46 +67,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleExportData = async () => {
-    const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!raw) {
-      alert('Нет данных для экспорта. Откройте любую страницу для генерации мок-данных.');
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(raw);
-      alert('JSON-дамп скопирован в буфер обмена');
-    } catch (error) {
-      const blob = new Blob([raw], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `mvdsai-backup-${Date.now()}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-  };
-
-  const handleImportData = () => {
-    if (!importPayload.trim()) {
-      alert('Вставьте JSON перед импортом');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(importPayload);
-      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed));
-      alert('Данные импортированы. Страница будет перезагружена.');
-      window.location.reload();
-    } catch (error) {
-      alert('Некорректный JSON. Проверьте формат.');
-    }
-  };
-
-  const handleResetData = () => {
-    if (!window.confirm('Сбросить локальные данные и восстановить демо-состояние?')) return;
-    window.localStorage.removeItem(LOCAL_STORAGE_KEY);
-    window.location.reload();
-  };
 
   const tabs = [
     { id: 'dashboard', label: '📊 Панель управления', icon: '📊' },
@@ -189,32 +150,9 @@ const AdminDashboard = () => {
                   <h3>Быстрые действия</h3>
                   <div className="quick-actions-grid">
                     <div className="quick-action-card">
-                      <h4>Экспорт данных</h4>
-                      <p>Скопировать локальную базу в буфер обмена или скачать JSON.</p>
-                      <button className="btn btn-primary btn-sm" onClick={handleExportData}>
-                        Экспортировать
-                      </button>
-                    </div>
-                    <div className="quick-action-card">
-                      <h4>Импорт JSON</h4>
-                      <p>Вставьте снимок базы (JSON) и восстановите состояние.</p>
-                      <textarea
-                        className="form-textarea"
-                        rows="3"
-                        placeholder='Вставьте JSON...'
-                        value={importPayload}
-                        onChange={(e) => setImportPayload(e.target.value)}
-                      />
-                      <button className="btn btn-secondary btn-sm" onClick={handleImportData}>
-                        Импортировать
-                      </button>
-                    </div>
-                    <div className="quick-action-card danger">
-                      <h4>Сброс данных</h4>
-                      <p>Очистить локальное хранилище и восстановить демо-набор.</p>
-                      <button className="btn btn-danger btn-sm" onClick={handleResetData}>
-                        Сбросить всё
-                      </button>
+                      <h4>Управление данными</h4>
+                      <p>Экспорт, импорт или сброс данных системы</p>
+                      <DataManager />
                     </div>
                   </div>
                 </div>
